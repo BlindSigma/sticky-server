@@ -1,19 +1,22 @@
 {
-  "name": "sticky-server",
-  "version": "0.0.1",
-  "description": "Cluster server processes and route client sockets to the same worker every time.",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BlindSigma/sticky-server.git"
-  },
-  "author": "Taylor Swanson",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/BlindSigma/sticky-server/issues"
-  },
-  "homepage": "https://github.com/BlindSigma/sticky-server#readme"
+    "name": "sticky-server",
+    "version": "0.0.1",
+    "description": "Cluster server processes and route client sockets to the same worker every time.",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "engines": {
+        "node": ">= 0.12.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/BlindSigma/sticky-server.git"
+    },
+    "author": "Taylor Swanson",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/BlindSigma/sticky-server/issues"
+    },
+    "homepage": "https://github.com/BlindSigma/sticky-server#readme"
 }
