@@ -1,4 +1,4 @@
-// This worker module will be created for each new cluster worker
+// This example worker module will be created for each new cluster worker
 
 // Any server will work so long as you can pass a socket to it
 var http    = require("http");
@@ -15,9 +15,11 @@ var ServerWorker = function() {
 
     // Start listening to a random port
     this.server.listen(0);
+
+    // Other server worker code here
+
 };
 
-// Function to pass to sticky-server
 // This will be called when a client is assigned to this worker
 ServerWorker.prototype.addConnection = function(socket) {
     console.log("Connection routed to worker " + cluster.worker.id);
