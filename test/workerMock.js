@@ -14,6 +14,7 @@ WorkerMock.prototype.kill = function(code, signal) {
 };
 
 WorkerMock.prototype.send = function(message, data) {
+    console.log(message, data);
     // Reemit message and data
     this.emit("messageReceived", { message: message, data: data });
 };

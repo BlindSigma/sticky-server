@@ -94,7 +94,132 @@ describe("StickyServer Master", function() {
         });
 
         // Kill a Worker
-        master.workers[0].kill(234, "SIGMURDER")
+        master.workers[0].kill(234, "SIGMURDER");
+    });
+    it("should emit workerRespawned event when worker is killed", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "always",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        master.on("workerRespawned", function(details) {
+            // Check that values are correct
+            expect(details.worker).to.be.an("object");
+            // Check to see that worker is respawned in the same place
+            expect(master.workers[1].killed).to.be.false;
+        });
+
+        // Kill a Worker
+        master.workers[1].kill(234, "SIGMURDER");
+
+        // Make sure it revived
+        expect(master.workers[1].killed).to.be.false;
+    });
+    it("should not emit workerRespawned event for clean exit when config.respawn=\"error\"", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "error",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        master.on("workerRespawned", function(details) {
+            throw new Error("Worker respawned even though there was a clean exit");
+        });
+
+        // Kill a Worker
+        master.workers[1].kill(0, "POLITE");
+
+        // Make sure it died
+        expect(master.workers[1].killed).to.be.true;
+    });
+    it("should never emit workerRespawned event for any exit when config.respawn=\"never\"", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "never",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        master.on("workerRespawned", function(details) {
+            throw new Error("Worker respawned even though it shouldn't have");
+        });
+
+        // Kill a few Workers
+        master.workers[1].kill(0, "POLITE");
+        master.workers[2].kill(4, "ROUGH");
+
+        // Make sure they're dead
+        expect(master.workers[1].killed).to.be.true;
+        expect(master.workers[2].killed).to.be.true;
+    });
+    it("should generate a proper index for workers", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "never",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        var seedValue = master.indexSeed;
+
+        // Sample ips
+        var tests = [
+            { in: "128.42.43.12",         out: ((128424312     + seedValue) % numCPUs) },
+            { in: "12.12.12.12",          out: ((12121212      + seedValue) % numCPUs) },
+            { in: "54.55.0.0",            out: ((545500        + seedValue) % numCPUs) },
+            { in: "::1",                  out: ((1             + seedValue) % numCPUs) },
+            { in: "ffff::::192.168.1.4",  out: ((19216814      + seedValue) % numCPUs) },
+            { in: "2001:cdba::3257:9652", out: ((200132579652  + seedValue) % numCPUs) }
+        ];
+
+        for (var i = 0; i < tests.length; i++) {
+            var output = master.getIndex(tests[i].in, numCPUs);
+            expect(output).to.equal(tests[i].out);
+        }
+    });
+    it("should balance to workers using ip address", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "always",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        var seedValue = master.indexSeed;
+
+        // Sample ips
+        var tests = [
+            { in: "128.42.43.12",         out: ((128424312     + seedValue) % numCPUs) },
+            { in: "12.12.12.12",          out: ((12121212      + seedValue) % numCPUs) },
+            { in: "54.55.0.0",            out: ((545500        + seedValue) % numCPUs) },
+            { in: "::1",                  out: ((1             + seedValue) % numCPUs) },
+            { in: "ffff::::192.168.1.4",  out: ((19216814      + seedValue) % numCPUs) },
+            { in: "2001:cdba::3257:9652", out: ((200132579652  + seedValue) % numCPUs) }
+        ];
+
+        for (var i = 0; i < tests.length; i++) {
+            // Spoof socket
+            var socket = {};
+            socket.remoteAddress = tests[i].in;
+
+            master.balance(socket);
+
+            // Watch designated worker
+            master.workers[tests[i].out].on("messageReceived", function(details) {
+                // Make sure the right message is sent
+                expect(details.message).to.equal("sticky-server:connection");
+                // Make sure socket is passed through message
+                expect(details.data.socket.remoteAddress).to.equal(tests[i].in);
+            });
+        }
     });
 });
 
