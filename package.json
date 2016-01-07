@@ -1,6 +1,6 @@
 {
   "name": "sticky-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cluster server processes and route client sockets to the same worker every time.",
   "main": "lib/index.js",
   "scripts": {
