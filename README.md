@@ -81,4 +81,10 @@ Tests use [Mocha](https://github.com/mochajs/mocha), [Chai](https://github.com/c
 
 Feel free to add more tests, coverage could certainly be improved. Tests are required for new PRs to be accepted.
 
+Since this package behaves differently depending on the number of cores available to your machine, tests may fail on single-core machines.
+
     npm test
+
+    ...
+
+    13 passing (38ms)
