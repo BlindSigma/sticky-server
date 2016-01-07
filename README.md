@@ -74,3 +74,11 @@ ServerWorker.prototype.addConnection = function(socket) {
 
 module.exports = ServerWorker;
 ```
+
+## Testing ##
+
+Tests use [Mocha](https://github.com/mochajs/mocha), [Chai](https://github.com/chaijs/chai), and [Rewire](https://github.com/jhnns/rewire)
+
+Feel free to add more tests, coverage could certainly be improved. Tests are required for new PRs to be accepted.
+
+    npm test
