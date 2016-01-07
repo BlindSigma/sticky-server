@@ -217,7 +217,7 @@ describe("StickyServer Master", function() {
                 // Make sure the right message is sent
                 expect(details.message).to.equal("sticky-server:connection");
                 // Make sure socket is passed through message
-                expect(details.data.socket.remoteAddress).to.equal(tests[i].in);
+                expect(details.socket.remoteAddress).to.equal(tests[i].in);
             });
         }
     });
