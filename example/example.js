@@ -1,6 +1,6 @@
 var cluster = require("cluster");
 
-var StickyServer = require("../lib/index.js");
+var StickyServer = require("../lib/index.js"); // require("sticky-server");
 
 // Custom worker
 var ServerWorker = require("./worker.js");
