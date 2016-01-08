@@ -1,7 +1,10 @@
 {
   "name": "sticky-server",
   "version": "0.1.2",
-  "description": "Cluster server processes and route client sockets to the same worker every time",
+  "description": "Barebones server clustering which routes client sockets to the same worker every time",
+  "keywords": [
+      "server", "cluster", "consistent", "websocket", "networking"
+  ],
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha ./test/"
