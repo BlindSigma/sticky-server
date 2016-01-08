@@ -14,6 +14,7 @@ var ServerWorker = function ServerWorker() {
     });
 
     // Start listening to a random port
+    // Don't listen on the same port as the master server
     this.server = server.listen(0);
 
     // Other server worker code here

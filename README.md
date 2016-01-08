@@ -15,7 +15,7 @@ See /example/ for full code
 
 Main server.js file:
 
-```node
+```javascript
 var cluster = require("cluster");
 var StickyServer = require("sticky-server");
 
@@ -45,7 +45,7 @@ if (cluster.isMaster) {
 
 worker.js:
 
-```node
+```javascript
 // Any server will work so long as you can pass a socket to it
 var http    = require("http");
 
