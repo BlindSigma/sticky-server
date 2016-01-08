@@ -32,4 +32,14 @@ ServerWorker.prototype.addConnection = function(socket) {
     socket.resume();
 };
 
+// Catch messages if they are sent to this worker
+ServerWorker.prototype.clusterMessage = function(message) {
+    console.log("Message received by worker " + cluster.worker.id + ": " + message);
+
+    if (message === "Sent a connection your way") {
+        // Reply
+        process.send("Thanks!");
+    }
+};
+
 module.exports = ServerWorker;
