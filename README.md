@@ -11,7 +11,7 @@ So long as the server you're trying to implement can read from a socket, this li
 
 ## Usage ##
 
-See /example/ for full code
+See /example/ for more detailed code and worker/master messaging.
 
 Main server.js file:
 
