@@ -33,6 +33,7 @@ ServerWorker.prototype.addConnection = function(socket) {
 };
 
 // Catch messages if they are sent to this worker
+// This is an optional method, if you exclude it then it won't be called
 ServerWorker.prototype.clusterMessage = function(message) {
     console.log("Message received by worker " + cluster.worker.id + ": " + message);
 
