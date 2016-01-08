@@ -24,7 +24,7 @@ if (cluster.isMaster) {
     });
 
     master.on("workerDied", function(event) {
-        console.log("Worker died:", event.worker, "with code", event.code);
+        console.log("Worker died:", event.worker.id, "with code", event.code);
         // Send a message to all workers
         master.broadcast("Worker " + event.worker.id + " died");
     });
