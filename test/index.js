@@ -209,8 +209,7 @@ describe("StickyServer Master", function() {
 
         for (var i = 0; i < tests.length; i++) {
             // Spoof socket
-            var socket = {};
-            socket.remoteAddress = tests[i].in;
+            var socket = new SocketMock(tests[i].in);
 
             master.balance(socket);
 
