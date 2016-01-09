@@ -13,7 +13,7 @@ Since sticky-server doesn't host an http server of its own, you shouldn't have a
 
 ## Usage ##
 
-See /example/ for full code
+See /example/ for more detailed code and worker/master messaging.
 
 Main server.js file:
 
@@ -47,7 +47,7 @@ if (cluster.isMaster) {
 
 worker.js:
 
-```node
+```javascript
 // Any server will work so long as you can pass a socket to it
 var http    = require("http");
 

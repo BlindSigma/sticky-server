@@ -24,7 +24,24 @@ if (cluster.isMaster) {
     });
 
     master.on("workerDied", function(event) {
-        console.log("Worker died:", event.worker, "with code", event.code);
+        console.log("Worker died:", event.worker.id, "with code", event.code);
+        // Send a message to all workers
+        master.broadcast("Worker " + event.worker.id + " died");
+    });
+
+    master.on("connectionRouted", function(event) {
+        var worker = event.worker;
+        var socket = event.socket;
+
+        // Send a message to that specific worker
+        master.send("Sent a connection your way", worker.id);
+    });
+
+    master.on("workerMessage", function(event) {
+        var worker = event.worker;
+        var message = event.message;
+
+        console.log("Received message from worker " + worker.id + ": " + message);
     });
 
     // Other master code here

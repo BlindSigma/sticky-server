@@ -14,6 +14,7 @@ var ServerWorker = function ServerWorker() {
     });
 
     // Start listening to a random port
+    // Don't listen on the same port as the master server
     this.server = server.listen(0);
 
     // Other server worker code here
@@ -29,6 +30,17 @@ ServerWorker.prototype.addConnection = function(socket) {
 
     // Resume connection (necessary, sticky-server uses pauseOnConnect)
     socket.resume();
+};
+
+// Catch messages if they are sent to this worker
+// This is an optional method, if you exclude it then it won't be called
+ServerWorker.prototype.clusterMessage = function(message) {
+    console.log("Message received by worker " + cluster.worker.id + ": " + message);
+
+    if (message === "Sent a connection your way") {
+        // Reply
+        process.send("Thanks!");
+    }
 };
 
 module.exports = ServerWorker;
