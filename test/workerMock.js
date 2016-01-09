@@ -18,4 +18,8 @@ WorkerMock.prototype.send = function(message, data) {
     this.emit("messageReceived", { message: message, socket: data });
 };
 
+WorkerMock.prototype.isConnected = function() {
+    return !this.killed;
+};
+
 module.exports = WorkerMock;

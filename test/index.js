@@ -6,6 +6,8 @@ var StickyServer = require("../lib/index.js");
 var StickyMaster = rewire("../lib/master.js");
 var StickyWorker = rewire("../lib/worker.js");
 
+var SocketMock = require("./socketMock.js");
+
 describe("StickyServer", function() {
     var sticky;
 
@@ -220,6 +222,38 @@ describe("StickyServer Master", function() {
                 expect(details.socket.remoteAddress).to.equal(tests[i].in);
             });
         }
+    });
+    it("should wait for a worker to respawn before crashing on reroute", function() {
+        var master = new StickyMaster(3030, {
+            maxWorkers: 0,
+            respawn: "always",
+            testing: {
+                fakeSpawn: true
+            }
+        });
+
+        var seedValue = master.indexSeed;
+
+        // Sample ip
+        var test = { in: "128.42.43.12", out: ((128424312 + seedValue) % numCPUs) };
+
+        // Spoof socket
+        var socket = new SocketMock(test[i].in);
+
+        // Kill designated worker before balance
+        master.workers[test.out].kill(0, "COODE");
+
+        master.balance(socket);
+
+        // Watch for failed route attempt
+        master.on("connectionDropped", function(details) {
+            // Make sure the right message is sent
+            expect(details.worker).to.equal(master.workers[test.out]);
+            // Make sure socket is passed through message
+            expect(details.socket.remoteAddress).to.equal(test.in);
+            // Make sure socket is destroyed
+            expect(details.socket.isDestroyed).to.be.true;
+        });
     });
 });
 

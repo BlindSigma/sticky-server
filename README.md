@@ -5,7 +5,7 @@ A small Node library designed to route incoming connections to individual worker
 
 You must be able to pass a node socket to the server you're trying to use in a cluster.
 
-Since sticky-server doesn't host an http server of its own, you shouldn't have any issues with HTTP headers in reverse-proxy scenarios.
+Also note that, since sticky-server doesn't host an http server of its own, you shouldn't have any issues with HTTP headers in reverse-proxy scenarios.
 
 ## Installation ##
 
@@ -13,7 +13,7 @@ Since sticky-server doesn't host an http server of its own, you shouldn't have a
 
 ## Usage ##
 
-See /example/ for more detailed code and worker/master messaging.
+See /example/ for full code
 
 Main server.js file:
 
