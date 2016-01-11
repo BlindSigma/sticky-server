@@ -1,6 +1,6 @@
 {
   "name": "sticky-server",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Barebones server clustering which routes client sockets to the same worker every time",
   "keywords": [
       "server", "cluster", "consistent", "websocket", "networking"
