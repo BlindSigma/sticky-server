@@ -6,6 +6,8 @@ var StickyServer = require("../lib/index.js");
 var StickyMaster = rewire("../lib/master.js");
 var StickyWorker = rewire("../lib/worker.js");
 
+var SocketMock = require("./socketMock.js");
+
 describe("StickyServer", function() {
     var sticky;
 
@@ -171,12 +173,12 @@ describe("StickyServer Master", function() {
 
         // Sample ips
         var tests = [
-            { in: "128.42.43.12",         out: ((128424312     + seedValue) % numCPUs) },
-            { in: "12.12.12.12",          out: ((12121212      + seedValue) % numCPUs) },
-            { in: "54.55.0.0",            out: ((545500        + seedValue) % numCPUs) },
-            { in: "::1",                  out: ((1             + seedValue) % numCPUs) },
-            { in: "ffff::::192.168.1.4",  out: ((19216814      + seedValue) % numCPUs) },
-            { in: "2001:cdba::3257:9652", out: ((200132579652  + seedValue) % numCPUs) }
+            { in: "128.42.43.12",         out: ((128424312    + seedValue) % numCPUs) },
+            { in: "12.12.12.12",          out: ((12121212     + seedValue) % numCPUs) },
+            { in: "54.55.0.0",            out: ((545500       + seedValue) % numCPUs) },
+            { in: "::1",                  out: ((1            + seedValue) % numCPUs) },
+            { in: "ffff::::192.168.1.4",  out: ((19216814     + seedValue) % numCPUs) },
+            { in: "2001:cdba::3257:9652", out: ((200132579652 + seedValue) % numCPUs) }
         ];
 
         for (var i = 0; i < tests.length; i++) {
@@ -197,18 +199,17 @@ describe("StickyServer Master", function() {
 
         // Sample ips
         var tests = [
-            { in: "128.42.43.12",         out: ((128424312     + seedValue) % numCPUs) },
-            { in: "12.12.12.12",          out: ((12121212      + seedValue) % numCPUs) },
-            { in: "54.55.0.0",            out: ((545500        + seedValue) % numCPUs) },
-            { in: "::1",                  out: ((1             + seedValue) % numCPUs) },
-            { in: "ffff::::192.168.1.4",  out: ((19216814      + seedValue) % numCPUs) },
-            { in: "2001:cdba::3257:9652", out: ((200132579652  + seedValue) % numCPUs) }
+            { in: "128.42.43.12",         out: ((128424312    + seedValue) % numCPUs) },
+            { in: "12.12.12.12",          out: ((12121212     + seedValue) % numCPUs) },
+            { in: "54.55.0.0",            out: ((545500       + seedValue) % numCPUs) },
+            { in: "::1",                  out: ((1            + seedValue) % numCPUs) },
+            { in: "ffff::::192.168.1.4",  out: ((19216814     + seedValue) % numCPUs) },
+            { in: "2001:cdba::3257:9652", out: ((200132579652 + seedValue) % numCPUs) }
         ];
 
         for (var i = 0; i < tests.length; i++) {
             // Spoof socket
-            var socket = {};
-            socket.remoteAddress = tests[i].in;
+            var socket = new SocketMock(tests[i].in);
 
             master.balance(socket);
 
@@ -220,6 +221,103 @@ describe("StickyServer Master", function() {
                 expect(details.socket.remoteAddress).to.equal(tests[i].in);
             });
         }
+    });
+    it("should wait for a worker to respawn before crashing on reroute", function(done) {
+        this.timeout(4500);
+
+        var master = new StickyMaster(3031, {
+            maxWorkers: 0,
+            respawn: "never",
+            testing: {
+                fakeSpawn: true
+            },
+            balanceWaitTime: 2000,
+            maxBalanceAttempts: 2
+        });
+
+        var seedValue = master.indexSeed;
+
+        // Sample ip
+        var test = { in: "128.42.43.12", out: ((128424312 + seedValue) % numCPUs) };
+
+        var waited = false;
+
+        // Spoof socket
+        var socket = new SocketMock(test.in);
+
+        // Kill designated worker before balance
+        master.workers[test.out].kill(0, "COODE");
+
+        master.balance(socket);
+
+        // Time to wait as master retries
+        setTimeout(function() {
+            waited = true;
+        }, 3950);
+
+        // Watch for failed route attempt
+        master.on("connectionDropped", function(details) {
+            if (!waited) {
+                throw new Error("Master didn't wait for balanceWaitTime * maxBalanceAttempts ms before dropping connection");
+                return;
+            }
+            // Make sure the right message is sent
+            expect(details.worker).to.equal(master.workers[test.out]);
+            // Make sure socket is passed through message
+            expect(details.socket.remoteAddress).to.equal(test.in);
+            // Make sure socket is destroyed
+            expect(details.socket.isDestroyed).to.be.true;
+
+            done();
+        }.bind(this));
+    });
+    it("should retry and use respawned process", function(done) {
+        this.timeout(4500);
+
+        var master = new StickyMaster(3032, {
+            maxWorkers: 0,
+            respawn: "never",
+            testing: {
+                fakeSpawn: true
+            },
+            balanceWaitTime: 2000,
+            maxBalanceAttempts: 2
+        });
+
+        var seedValue = master.indexSeed;
+
+        // Sample ip
+        var test = { in: "128.42.43.12", out: ((128424312 + seedValue) % numCPUs) };
+
+        var waited = false;
+
+        // Spoof socket
+        var socket = new SocketMock(test.in);
+
+        // Kill designated worker before balance
+        master.workers[test.out].kill(0, "COODE");
+
+        master.balance(socket);
+
+        // Time to wait as master retries
+        setTimeout(function() {
+            // Unkill process
+            master.workers[test.out].killed = false;
+        }, 1000);
+
+        // Watch for failed route attempt
+        master.on("connectionDropped", function(details) {
+            throw new Error("Connection shouldn't be dropped in this test after worker is respawned");
+
+            done();
+        }.bind(this));
+
+        master.on("connectionRouted", function(details) {
+            expect(details.worker).to.equal(master.workers[test.out]);
+            expect(details.socket).to.equal(socket);
+
+            done();
+        });
     });
 });
 

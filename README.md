@@ -3,7 +3,9 @@ sticky-server
 
 A small Node library designed to route incoming connections to individual worker processes. Heavily modeled after [sticky-session](https://github.com/indutny/sticky-session) and [node-cluster-socket.io](https://github.com/elad/node-cluster-socket.io), this package aims to provide socket/worker clustering in a server-independent manner.
 
-So long as the server you're trying to implement can read from a socket, this library should work.
+You must be able to pass a node socket to the server you're trying to use in a cluster.
+
+Also note that, since sticky-server doesn't host an http server of its own, you shouldn't have any issues with HTTP headers in reverse-proxy scenarios.
 
 ## Installation ##
 
@@ -11,7 +13,7 @@ So long as the server you're trying to implement can read from a socket, this li
 
 ## Usage ##
 
-See /example/ for more detailed code and worker/master messaging.
+See the example for a full usage example.
 
 Main server.js file:
 
@@ -87,4 +89,4 @@ Since this package behaves differently depending on the number of cores availabl
 
     ...
 
-    13 passing (38ms)
+    15 passing (6s)
