@@ -13,7 +13,7 @@ Also note that, since sticky-server doesn't host an http server of its own, you 
 
 ## Usage ##
 
-See /example/ for full code
+See the example for a full usage example.
 
 Main server.js file:
 
@@ -89,4 +89,4 @@ Since this package behaves differently depending on the number of cores availabl
 
     ...
 
-    13 passing (38ms)
+    15 passing (6s)
