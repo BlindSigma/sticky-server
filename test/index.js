@@ -319,51 +319,6 @@ describe("StickyServer Master", function() {
             done();
         });
     });
-    it("should attempt to rebalance connections to next available worker", function(done) {
-        this.timeout(2500);
-
-        var master = new StickyMaster(3033, {
-            maxWorkers: 0,
-            respawn: "never",
-            testing: {
-                fakeSpawn: true
-            },
-            balanceWaitTime: 2000,
-            maxBalanceAttempts: 2,
-            rerouteWorkers: true
-        });
-
-        var seedValue = master.indexSeed;
-
-        // Sample ip
-        var test = { in: "128.42.43.12", out: ((128424312 + seedValue) % numCPUs) };
-
-        // Spoof socket
-        var socket = new SocketMock(test.in);
-
-        // Kill designated worker before balance
-        master.workers[test.out].kill(0, "COODE");
-
-        master.balance(socket);
-
-        // Watch for failed route attempt
-        master.on("connectionDropped", function(details) {
-            throw new Error("Connection shouldn't be dropped in this test after worker is respawned");
-
-            done();
-        }.bind(this));
-
-        master.on("connectionRouted", function(details) {
-            if (test.out === 0) {
-                expect(details.worker).to.equal(master.workers[1]);
-            } else {
-                expect(details.worker).to.equal(master.workers[0]);
-            }
-            expect(details.socket).to.equal(socket);
-
-            done();
-        });
-    });
 });
 
 describe("StickyServer Worker", function() {
